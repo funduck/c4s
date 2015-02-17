@@ -1,0 +1,28 @@
+.horiz-centered {
+  top: 0%;
+  left: 50%;
+  -moz-transform: translate(-50%, -0%);
+  -o-transform: translate(-50%, -0%);
+  -webkit-transform: translate(-0%, -0%);
+  transform: translate(-50%, -0%);
+}
+
+.game-menu {
+  z-index: 1;
+  position: fixed;
+}
+
+.popup{
+  z-index: 2;
+}
+
+.popup-centered {
+  z-index: 2; 
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  -moz-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}

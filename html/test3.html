@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+	<script src='js/support/jquery.js' type='text/javascript'></script>
+	<script src='js/support/underscore.js' type='text/javascript'></script>
+	<script src='js/support/backbone.js' type='text/javascript'></script>
+	<script src='js/support/Common.js' type='text/javascript'></script>
+
+	<script src='js/game_basic_objects.js' type='text/javascript'></script>
+	<script src='js/game_battle.js' type='text/javascript'></script>
+	<script src='js/game_basic_modifiers.js' type='text/javascript'></script>
+	<script src='js/GameParameters.js' type='text/javascript'></script>
+	<script src='js/DataBase.js' type='text/javascript'></script>
+	<script src='js/MVC_main.js' type='text/javascript'></script>
+	<!--script src='js/test.js' type='text/javascript'></script-->
+
+	<link href="css/custom.css" rel="stylesheet">
+
+    <script src='js/support/bootstrap.min.js' type='text/javascript'></script>
+    <!-- Bootstrap core CSS -->
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>C4S - Calculator For Sloveska</title>
+</head>
+<body>
+  <nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Brand</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link</a></li>
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+	<div class="container-fluid">
+	<div class="row">
+	<div class="col-lg-5 col-md-7 col-sm-9">
+	<div class="panel panel-default">
+	<div class="panel-heading">
+		<h4 class="panel-title">
+		<div class="row" id="app_heading">
+			
+		</div>
+		</h4>
+	</div>
+	<div class="panel-body">
+		<div id ="app_popups" class="row popup-centered">
+			
+		</div>
+		<div id ="app_body" class="row">
+			
+		</div>		
+	</div>
+	</div>
+	</div>	
+	</div>
+	</div> 
+	
+	<div class="container-fluid">
+	<div class="row">
+	<div class="col-lg-5 col-md-7 col-sm-9">
+	<div id="test">
+		
+	</div>
+	</div>
+	</div>
+	</div>
+
+ <script type="text/template" id="game-menu-template">
+ 	<div class="btn-group col-xs-7">
+	  <%= _template("#dropdown-refs-template", {_models : panels, _name : "Views", _action_name : "show:panel", _param_name : "panel", _param_value : "id", _value_name : "name" }) %>
+	  <button type="button" class="btn btn-warning" action='{"action" : "start:battle", "params" : {}}'>Start battle!</button>
+	  <button type="button" class="btn btn-info" action='{"action" : "save:db:index", "params" : {}}'>Save database index</button>	  
+  </div>
+  <div class="col-xs-5" id="messages">
+  	
+  </div>	
+ </script>
+ 
+ <script type="text/template" id="dropdown-refs-template">
+ 	  <% if(_models && _models != null){ %>
+ 	  <% if(_models.models){ var m = _models.models; }else{var m = _models}; %>  
+
+	  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><%- _name %><span class="caret"></span></button>
+	  <ul class="dropdown-menu" role="menu">
+	    <% for (var i in m) { %>
+  				<li>
+  				  <a href="#" action='{"action" : "<%- _action_name %>", "params" : {"<%- _param_name %>" : "<%- m[i][_param_value] %>"}}' ><%- m[i][_value_name] %></a>
+  				</li>
+  		<% } %>
+	  </ul>
+	  <% } %>
+ </script>
+ 
+ <script type="text/template" id="id-template">
+ 	<%- id %>
+ </script>
+ 
+ <script type="text/template" id="radio-template">
+ 	<input type="checkbox" action='{"action" : "<%- _btn_action %>", "params" : {"<%- _btn_param %>" : "<%- _btn_value %>"}}'>
+ </script>
+ 
+ <script type="text/template" id="button-template">
+ 	<button type="button" class="btn btn-default btn-sm" action='{"action" : "<%- _btn_action %>", "params" : {"<%- _btn_param %>" : "<%- _btn_value %>"}}'>
+ 		<%- _btn_name %>
+ 	</button>
+ </script>
+
+ <script type="text/template" id="collection-template">
+ 	<% if(_models.models){ var m = _models.models; }else{var m = _models}; %>
+ 	<% for(var i in m){ %> 		
+	 		<%= _template(_templ, m[i]) %>
+ 	<% } %>
+ </script>
+ 
+ <script type="text/template" id="table-collection-template">
+ 	<table class="table <%- _table_class %>">
+ 	<% if(_models.models){ var m = _models.models; }else{var m = _models}; %>
+ 	<% for(var i in m){ %>
+ 		<tr><td>
+ 		<%= _template(_templ, m[i]) %>
+ 		</td></tr>
+ 	<% } %>
+ 	</table>
+ </script>
+ 
+ <script type="text/template" id="table-collection-with-button-template">
+ 	<table class="table <%- _table_class %>">
+ 	<% if(_models.models){ var m = _models.models; }else{var m = _models}; %>
+ 	<% for(var i in m){ %>
+ 		<tr><td>
+ 			<%= _template(_templ, m[i]) %> 		
+ 		</td>
+ 		<td>
+ 			<%= _template(_btn_templ, {_btn_action : _btn_action, _btn_param : _btn_param, _btn_value : m[i][_param_value], _btn_name : _btn_name}) %>		
+ 		</td></tr>
+ 	<% } %>
+ 	</table>
+ </script>
+
+ <script type="text/template" id="simple-param-template">	
+ 	<div class="row">
+ 		<div class="col-xs-10">
+	 		<%- id %>
+	 	</div>
+	 	<div class="col-xs-2">
+	 	<%- value %>(<%- index %>)
+		</div>
+ 	</div> 	
+ </script>
+ 
+ <script type="text/template" id="simple-param-short-template">
+	<%- id %> (<%- value %> <%- index %>)
+ </script>
+ 
+ <script type="text/template" id="edit-simple-param-template">
+	<div class="row>">
+		<div class="col-xs-6">
+		<%- id %> (<%- value %> <%- index %>)
+		</div> 
+		<div class="col-xs-6">
+		<button type="button" class="btn btn-info btn-sm glyphicon-minus" action='{"action" : "decr:basic:value", "params" : {"id" : "<%- id %>"}}'></button>
+		<button type="button" class="btn btn-info btn-sm glyphicon-plus"  action='{"action" : "incr:basic:value", "params" : {"id" : "<%- id %>"}}'></button>
+		</div>
+	</div>
+ </script>
+ 
+ <script type="text/template" id="current-param-template">
+	<div class="row">
+ 		<div class="col-xs-10">
+	 		<%- id %>
+	 	</div>
+	 	<div class="col-xs-2">
+	 	<%- value %>
+		</div>
+ 	</div>
+ </script>
+ 
+ <script type="text/template" id="current-param-short-template">
+	<%- id %> (<%- value %>)
+ </script> 
+
+ <script type="text/template" id="character-action-template">
+ 		<%- id %>
+ </script>
+ 
+ <script type="text/template" id="character-modifier-template">
+ 	<div class="row">
+ 		<div class="col-xs-2"> 		
+ 		<%- id %>
+ 		</div>
+ 		<div class="col-xs-2">
+ 		<% if(used){ %>
+ 			<button type="button" class="btn btn-default" action='{"action" : "hold:modifier", "params" : {"modifier_id" : "<%- id %>"}}'>hold</button>
+ 		<% }else{ %>
+ 			<button type="button" class="btn btn-default" action='{"action" : "use:modifier", "params" : {"modifier_id" : "<%- id %>"}}'>use</button>
+ 		<% } %>
+ 		</div>
+ 		<div class="col-xs-8">
+ 		<%= _template("#table-collection-template", {_templ : "#id-template", _table_class : "table-condensed", _models : modifiers})%>	
+ 		</div>
+ 	</div>
+ </script>
+ 
+ <script type="text/template" id="character-battle-template">
+ 	<div class="row>
+	 	<div class="col-xs-4">
+	 		<%- id %>
+	 	</div>
+	 	<div class="col-xs-8">
+		 	<%= _template("#collection-template", {_templ : "#simple-param-short-template", _models : params.basics}) %>			
+			<%= _template("#collection-template", {_templ : "#current-param-short-template", _models : params.currents}) %>
+		</div>
+	</div>	
+ </script> 
+
+ <script type="text/template" id="character-panel-template">
+ 	<div class="col-xs-12">
+ 	<h4><%- character.id %></h4>
+ 	
+ 	<div class="row">
+	 	<div class="col-xs-6 panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">Basics</h4>
+		</div>
+		<div class="panel-body">
+			<%= _template("#collection-template", {_templ : "#simple-param-template", _models : character.params.basics}) %>		
+		</div>
+		</div>
+		<div class="col-xs-6 panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">Currents</h4>
+		</div>
+		<div class="panel-body">
+			<%= _template("#collection-template", {_templ : "#current-param-template", _models : character.params.currents}) %>		
+		</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="panel panel-default col-xs-12">
+		<div class="panel-heading">
+			<h4 class="panel-title">Actions</h4>
+		</div>
+		<div class="panel-body">
+			<%= _template("#collection-template", {_templ : "#character-action-template", _models : character.actions}) %>		
+		</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="panel panel-default col-xs-12">
+		<div class="panel-heading">
+			<h4 class="panel-title">Modifiers</h4>
+		</div>
+		<div class="panel-body">
+			<%= _template("#collection-template", {_templ : "#character-modifier-template", _models : character.modifiers}) %>		
+		</div>
+		</div>
+	</div>
+	<div class="row">
+	 		<div class="col-xs-8">
+	 		</div>
+	 		<div class="col-xs-2">
+		 	<button type="button" class="btn btn-default" action='{"action" : "edit:character", "params" : {"character_id" : "<%- character.id %>"}}'>EDIT</button>
+		 	</div>
+	 		<div class="col-xs-2">
+		 	<button type="button" class="btn btn-default" action='{"action" : "save:character", "params" : {"character_id" : "<%- character.id %>"}}'>SAVE</button>
+		 	</div>
+		</div>
+	</div>
+ </script>
+ 
+ <script type="text/template" id="characters-panel-template">    
+ 	<div class="col-xs-12">
+ 		<table class="table table-condensed">
+			<% for(var i in characters){ %>
+				<tr>
+					<td><%- characters[i].id %></td>
+					<td><button type="button" class="btn btn-default" action='{"action" : "view:character", "params" : {"character_id" : "<%- characters[i].id %>"}}'>DETAILS</button></td>					
+				 	<td><button type="button" class="btn btn-default" action='{"action" : "edit:character", "params" : {"character_id" : "<%- characters[i].id %>"}}'>EDIT</button></td>
+					<td><button type="button" class="btn btn-default" action='{"action" : "load:character", "params" : {"character_id" : "<%- characters[i].id %>"}}'>LOAD</button></td>
+					<td><button type="button" class="btn btn-default" action='{"action" : "drop:character", "params" : {"character_id" : "<%- characters[i].id %>"}}'>DROP</button></td>
+				</tr>
+			<% } %>
+  		</table>
+	  	<div class="row">	 		
+	 		<div class="col-xs-12">
+		 	<button type="button" class="btn btn-default" action='{"action" : "show:all:characters", "params" : {}}'>SHOW ALL</button>
+		 	
+		 	<button type="button" class="btn btn-default" action='{"action" : "save:characters", "params" : {}}'>SAVE SHOWN</button>
+		 	
+		 	<button type="button" class="btn btn-default" action='{"action" : "load:characters", "params" : {}}'>LOAD SHOWN</button>
+		 	</div>
+		</div>
+  	</div>	
+ </script>
+ 
+  <script type="text/template" id="battle-action-panel-template"> 	
+ 	<div class="row">
+ 		<div class="col-xs-2">
+ 			NEW ACTION:		
+ 		</div>
+ 		<div class="col-xs-10">
+ 			<%= _template("#battle-action-template", ba) %>
+ 		</div>
+ 	</div>
+ 	<div class="row">
+ 		<div class="col-xs-4">
+ 			<%= _template("#dropdown-refs-template", {_models : avail_acts, _name : "set Action", _action_name : "set:action", _param_name : "action_id", _param_value : "id", _value_name : "id" }) %>
+ 		</div>
+ 		<div class="col-xs-4">
+ 			<%= _template("#dropdown-refs-template", {_models : characters, _name : "add Target", _action_name : "add:target", _param_name : "character_id", _param_value : "id", _value_name : "id" }) %>
+ 		</div>
+ 		<div class="col-xs-4">
+ 			<%= _template("#dropdown-refs-template", {_models : ba.targets, _name : "rm Target", _action_name : "rm:target", _param_name : "character_id", _param_value : "id", _value_name : "id" }) %>
+ 		</div>
+ 	</div>
+ 	<br>
+	 	<button type="button" class="btn btn-default" action='{"action" : "commit:new:battle_action", "params" : {}}'>Commit</button>
+	 	<button type="button" class="btn btn-default" action='{"action" : "cancel:new:battle_action", "params" : {}}'>Cancel</button>
+ </script>
+ 
+ <script type="text/template" id="battle-action-template">
+ 	<div class="row">
+ 		<div class="col-xs-12">
+ 		<%- character.id %> <%= _template("#id-template", action) %> >>> (<%= _template("#collection-template", {_templ : "#id-template", _models : targets}) %>)
+ 		</div>
+ 	</div> 	
+ </script>
+ 
+ <script type="text/template" id="battle-effect-template">
+ 	<div class="row">
+ 		<div class="col-xs-12">
+ 		<%- character.id %> <<< <%= _template("#collection-template", {_templ : "#id-template", _models : modifier.modifiers})%>
+ 		</div>
+ 	</div> 	
+ </script>
+
+ <script type="text/template" id="battle-panel-template">
+ 	<div class="col-xs-12 panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title"><%- name %></h4>
+		</div>
+		<div class="panel-body">
+			<h5">Characters:</h5>	 		
+	 		<%= _template("#table-collection-with-button-template", {_templ : "#character-battle-template", _table_class : "table-condensed", _models : battle.characters, _param_value : "id", _btn_templ : "#button-template", _btn_name : "Action!", _btn_action : "create:battle_action", _btn_param : "character_id"}) %>	 		
+	 		<div class="row">
+	 			<div class="col-xs-3">Actions:</div>
+	 			<div class="col-xs-9"><%= _template("#table-collection-template", {_templ : "#battle-action-template", _table_class : "table-condensed", _models : battle.actions}) %></div>
+	 		</div>
+	 		<div class="row">
+	 			<div class="col-xs-3">Effect:</div>
+	 			<div class="col-xs-9"><%= _template("#battle-effect-template", battle.effect) %></div>
+	 		</div>
+	 		<div class="row">
+	 			<div class="col-xs-3">History:</div>
+	 		    <div class="col-xs-9"><%= _template("#collection-template", {_templ : "#battle-effect-template", _models : battle.effects}) %></div>
+	 		</div>
+	 		<br>
+	 		<button type="button" class="btn btn-default" action='{"action" : "compile:actions", "params" : {}}'>Compile</button>
+	 		<button type="button" class="btn btn-default" action='{"action" : "apply:actions", "params" : {}}'>Apply</button>
+	 	</div>
+  	</div>	
+ </script>
+ 
+ <script type="text/template" id="edit-character-panel-template">
+	<div class="col-xs-12">
+ 	<h4>EDIT <%- character.id %></h4> 	
+ 	<div class="row">
+	 	<div class="col-xs-6 panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">Basics</h4>
+		</div>
+		<div class="panel-body">
+			<%= _template("#table-collection-template", {_templ : "#edit-simple-param-template", _table_class : "table-condensed", _models : character.params.basics}) %>		
+		</div>
+		</div>
+		<div class="col-xs-6 panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">Currents</h4>
+		</div>
+		<div class="panel-body">
+			<%= _template("#collection-template", {_templ : "#current-param-template", _models : character.params.currents}) %>		
+		</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="panel panel-default col-xs-12">
+		<div class="panel-heading">
+			<h4 class="panel-title">Actions
+			<button type="button" class="btn btn-sm btn-default" action='{"action" : "add:action", "params" : {}}'>ADD</button>	
+			</h4>
+		</div>
+		<div class="panel-body">			
+			<%= _template("#table-collection-with-button-template", {_templ : "#id-template", _table_class : "table-condensed", _models : character.actions, _param_value : "id", _btn_templ : "#button-template", _btn_name : "Drop", _btn_action : "drop:action", _btn_param : "id"}) %>		
+		</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="panel panel-default col-xs-12">
+		<div class="panel-heading">
+			<h4 class="panel-title">Modifiers
+			<button type="button" class="btn btn-sm btn-default" action='{"action" : "add:modifier", "params" : {}}'>ADD</button>	
+			</h4>
+		</div>
+		<div class="panel-body">
+			<%= _template("#table-collection-with-button-template", {_templ : "#id-template", _table_class : "table-condensed", _models : character.modifiers, _param_value : "id", _btn_templ : "#button-template", _btn_name : "Drop", _btn_action : "drop:modifier", _btn_param : "id"}) %>			
+		</div>
+		</div>
+	</div>
+	<div class="row">
+	 		<div class="col-xs-6">
+	 		</div>
+	 		<div class="col-xs-6 input-group">
+		 		<div class="input-group-btn">	 		
+			 	 <button type="button" class="btn btn-sm btn-default" action='{"action" : "save_as:character", "params" : {"character_id" : "<%- character.id %>"}}'>SAVE AS</button>
+			 	</div>
+		 		<input type="text" class="input-sm" id="save_as_character_id" value="<%- character.id %>"></input>
+		 	</div>
+		</div>
+	</div> 		
+ </script>
+ 
+ <script type="text/template" id="add-item-panel-template">
+	<div class="panel panel-default col-xs-12">
+		<div class="panel-heading">
+			<h4 class="panel-title">Pick <%- type %></h4>
+		</div>
+		<div class="panel-body">
+			<%= _template("#table-collection-with-button-template", {_templ : "#id-template", _table_class : "", _models : items, _param_value : "id", _btn_templ : "#radio-template", _btn_param : "id", _btn_name : "", _btn_action : "pick:item", _btn_param : "id"}) %>			
+			<button type="button" class="btn btn-sm btn-default" action='{"action" : "pick:all:items", "params" : {}}'>Pick all</button>
+			<button type="button" class="btn btn-sm btn-default" action='{"action" : "pick:selected:items", "params" : {}}'>Pick selected</button>
+			<button type="button" class="btn btn-sm btn-default" action='{"action" : "cancel:pick:item", "params" : {}}'>Cancel</button>					
+		</div>
+	</div>  		
+ </script>
+
+<script src='js/MVC_views.js' type='text/javascript'></script>
+
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src='js/support/jquery.js' type='text/javascript'></script>
+	<script src='js/support/underscore.js' type='text/javascript'></script>
+	<script src='js/support/backbone.js' type='text/javascript'></script>
+	<script src='js/support/taffy.js' type='text/javascript'></script>
+	<script src='js/support/backbone_common.js' type='text/javascript'></script>
+	<script src='js/support/fabric.require.js' type='text/javascript'></script>
+	<script src='js/support/fabric.js' type='text/javascript'></script>
+
+	<script src='js/support/my/common.js' type='text/javascript'></script>
+	<script src='js/support/my/json.js' type='text/javascript'></script>
+	<script src='js/support/my/MinPQ.js' type='text/javascript'></script>
+	<script src='js/support/my/DuckMQ.js' type='text/javascript'></script>
+
+	<script src='js/game/templates/parameters.js' type='text/javascript'></script>
+	<script src='js/game/templates/actions.js' type='text/javascript'></script>
+	<script src='js/game/templates/character.js' type='text/javascript'></script>
+	<script src='js/game/templates/cube.js' type='text/javascript'></script>
+	<script src='js/game/templates/modificator.js' type='text/javascript'></script>
+	<script src='js/game/templates/effects.js' type='text/javascript'></script>
+
+	<script src='js/game/console_input.js' type='text/javascript'></script>
+	<script src='js/game/modules.js' type='text/javascript'></script>
+	<script src='js/game/module_character.js' type='text/javascript'></script>
+	<script src='js/game/module_estimate.js' type='text/javascript'></script>
+	<script src='js/game/module_apply_effect.js' type='text/javascript'></script>
+	<script src='js/game/init_smq_modules.js' type='text/javascript'></script>	
+	
+	<script src='js/test_canvas.js' type='text/javascript'></script>
+
+	<link href="css/custom.css" rel="stylesheet">
+
+    <script src='js/support/bootstrap.min.js' type='text/javascript'></script>
+    <!-- Bootstrap core CSS -->
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>TEST C4S</title>
+        
+</head>
+<body id="body">
+
+<canvas id="game_canvas" style="border:1px solid #d3d3d3;" width="600" height="600">
+</canvas>
+
+<script type="text/template" id="console_input">
+<input type="text" style="width: 100%" value="<%- input_line %>" style="margin-left: 20dp"/>
+</script>
+
+</body>
+</html>
