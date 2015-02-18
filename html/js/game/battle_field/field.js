@@ -18,7 +18,7 @@ TemplateField = {
         return objects;
     },
     /*
-    * returns [] of neighbors indeces
+    * returns [] of neighbors indices
     */
     neighbors : function(cell_id){},
     /*
@@ -41,12 +41,14 @@ TemplateField = {
                 return 0;
             }
         );
+
         pq.insert({distance : this.distance(cell_from, cell_to), cells : [cell_from]});
+
         var count = 1;
         do {
             // take shortest way
             var way = pq.delMin();
-            
+            console.log("delMin: ",way);
             // check if we came where we wanted to
             if (way.distance == 0) return way;
             
@@ -57,7 +59,7 @@ TemplateField = {
                 var n = neighbors[c];
                 
                 // this history contains several last points, so we wont walk circles
-                if (hist.contains(n)) continue;
+                //if (hist.contains(n)) continue;
                 
                 // this filter allows to add conditions for cells that CAN'T be in the way
                 if (filter != null) {                
@@ -100,19 +102,38 @@ function HexField(sizeX, sizeY){
         var n = [];
         if (cell_id % hf.sizeX > 0) n.push(cell_id - 1); // left
         if (cell_id % hf.sizeX < hf.sizeX - 1) n.push(cell_id + 1); // right
-        if (cell_id > hf.sizeX - 1) n.push(cell_id - hf.sizeX); // up
+
         // for downs
         if (cell_id < hf.sizeX*(hf.sizeY - 1)) {
             n.push(cell_id + hf.sizeX); // down
-            if (cell_id % hf.sizeX > 0) n.push(cell_id - 1 + hf.sizeX); // left
-            if (cell_id % hf.sizeX < hf.sizeX - 1) n.push(cell_id + 1 + hf.sizeX); // right
+            if ((cell_id % hf.sizeX) % 2 == 1) {
+                if (cell_id % hf.sizeX > 0) n.push(cell_id - 1 + hf.sizeX); // left
+                if (cell_id % hf.sizeX < hf.sizeX - 1) n.push(cell_id + 1 + hf.sizeX); // right
+            }
         }
+        // for ups
+        if (cell_id > hf.sizeX - 1) {
+            n.push(cell_id - hf.sizeX); // up
+            if ((cell_id % hf.sizeX) % 2 == 0) {
+                if (cell_id % hf.sizeX > 0) n.push(cell_id - 1 - hf.sizeX); // left
+                if (cell_id % hf.sizeX < hf.sizeX - 1) n.push(cell_id + 1 - hf.sizeX); // right
+            }
+        }
+        console.log("neighbours ",n);
         return n;
     };    
     hf.distance = function(cell1, cell2){
         var d = abs((cell2 % hf.sizeX) - (cell1 % hf.sizeX));
         d += abs(round(cell2/hf.sizeX) - round(cell1/hf.sizeX));
         return d;
-    },
+    };
+    return hf;
 };
 
+testHexField = function(){
+    console.log("HexField testing");
+    var hf = HexField(3,3);
+    console.log(hf);
+    var way = hf.shortest_way(2,3,null);
+    console.log("shortest way ", way);
+}

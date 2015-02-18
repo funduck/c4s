@@ -4,7 +4,7 @@
 function MinPQ(comparator){
     return {
         pq : [],                     // store items at indices 1 to N
-        N : -1,                // number of items on priority queue
+        N : 0,                       // number of items on priority queue
         comparator : comparator,     // optional comparator function (a, b), returns a >=< b  --- 1, 0, -1
 
         isEmpty : function() {
@@ -35,7 +35,7 @@ function MinPQ(comparator){
             if (this.N >= this.pq.length)
                 this.pq.push(x);
             else
-                this.pq[this.N] = x;
+                this.pq[this.N - 1] = x;
             // add x, and percolate it up to maintain heap invariant
             this.swim(this.N);
         },
@@ -50,12 +50,11 @@ function MinPQ(comparator){
                 console.warn("MinPQ is empty!");
                 return null;
             }
-            console.log(this.pq);
-            this.exch(0, this.N);
-            min = this.pq.pop();//[this.N];
+            this.exch(1, this.N);
+            min = this.pq.pop();//[this.N-1];
             this.N--;
-            this.sink(0);
-            //this.pq[this.N+1] = null;
+            this.sink(1);
+            //this.pq[this.N] = null;
 
             return min;
         },
@@ -66,9 +65,9 @@ function MinPQ(comparator){
         **********************************************************************/
 
         swim : function(k) {
-            while (k > 0 && this.greater(round(k/2), k)) {
+            while (k > 1 && this.greater(round(k/2), k)) {
                 this.exch(k, round(k/2));
-                k = k/2;
+                k = round(k/2);
             }
         },
 
@@ -86,13 +85,13 @@ function MinPQ(comparator){
         * Helper functions for compares and swaps.
         **********************************************************************/
         greater : function(i, j) {
-                return this.comparator(this.pq[i], this.pq[j]) > 0;
+                return this.comparator(this.pq[i-1], this.pq[j-1]) > 0;
         },
 
         exch : function(i, j) {
-            swap = this.pq[i];
-            this.pq[i] = this.pq[j];
-            this.pq[j] = swap;
+            swap = this.pq[i-1];
+            this.pq[i-1] = this.pq[j-1];
+            this.pq[j-1] = swap;
         },
         // is subtree of pq[1..N] rooted at k a min heap?
         isMinHeap : function(k) {
@@ -105,3 +104,17 @@ function MinPQ(comparator){
         }
     };
 };
+
+testMinPQ = function(){
+    pq = MinPQ(function(a,b){
+    if (a > b) return 1;
+    if (a < b) return -1;
+    return 0;
+    });
+
+    for (var i = 0;i < 10;i++)
+        pq.insert(11 - i);
+
+    console.log("test MinPQ ",pq.pq);
+    console.log("test MinPQ, delMin(): ",pq.delMin());
+}

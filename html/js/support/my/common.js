@@ -43,23 +43,22 @@ function clone(obj) {
     }
 
     throw new Error("Unable to copy obj! Its type isn't supported.");
-}
+};
 
 function log(text){
 	if(!logging_silent){
 		console.log(text);
 	}
-}
+};
 
 function Sequence(_v){
-    return
-    {
-    	value : _v,
-    	nextval : function(){
-    		this.value = this.value + 1;
-    		return this.value; 
-    	}
-	};
+    return {
+        value : _v,
+        nextval : function() {
+                  this.value++;
+                  return this.value;
+                  }
+        };
 };
 
 function round(x){
@@ -71,4 +70,4 @@ function abs(x){
     if (x < 0)
         return -x;
     return x;
-}
+};
