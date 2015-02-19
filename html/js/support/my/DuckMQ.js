@@ -101,7 +101,7 @@ function DuckClient(){
               this.queue.putMessage({message : message, data : {data : data, event : message}});
       },
       printHelp : function() {
-          console.log("DuckClient '" + this.id + "' accepts messages: " + this.event_in);
+          console.log("DuckClient '" + this.id + "' commands are: " + this.event_in);
       }
   };
 };
