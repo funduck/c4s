@@ -51,7 +51,7 @@ function MinPQ(comparator){
                 return null;
             }
             this.exch(1, this.N);
-            min = this.pq.pop();//[this.N-1];
+            var min = this.pq.pop();//[this.N-1];
             this.N--;
             this.sink(1);
             //this.pq[this.N] = null;
@@ -73,7 +73,7 @@ function MinPQ(comparator){
 
         sink : function(k) {
             while (2*k <= this.N) {
-                j = 2*k;
+                var j = 2*k;
                 if (j < this.N && this.greater(j, j+1)) j++;
                 if (!this.greater(k, j)) break;
                 this.exch(k, j);
@@ -89,15 +89,15 @@ function MinPQ(comparator){
         },
 
         exch : function(i, j) {
-            swap = this.pq[i-1];
+            var swap = this.pq[i-1];
             this.pq[i-1] = this.pq[j-1];
             this.pq[j-1] = swap;
         },
         // is subtree of pq[1..N] rooted at k a min heap?
         isMinHeap : function(k) {
             if (k > this.N) return true;
-            left = 2*k;
-            right = 2*k + 1;
+            var left = 2*k;
+            var right = 2*k + 1;
             if (left  <= this.N && this.greater(k, left))  return false;
             if (right <= this.N && this.greater(k, right)) return false;
             return (this.isMinHeap(left) && this.isMinHeap(right));

@@ -1,68 +1,74 @@
-var ModuleHelp = DuckMessageQueueClient.extend({
-	id : "ModuleHelp",
-	event_in : ["help", "print", "print:json"],
-	
-	modules : null,
-	initialize : function () {
-		this.modules = new SimpleCollection({id : "modules"});
-	},
-	include : function (module) {
-		this.modules.add(module);
-	},
-	processMessage : function (event, data) {
-		switch (event) {
-			case "help" : this.printHelp(data); break;
-			case "print" : 
-				if (data.data)
-					console.info(data.data); 
-				else
-					console.info(data);
-				break;
-			case "print:json" : console.info(JSON.stringify(data.data)); break;
-			default : console.warning(this.id + ": we are not supposed to receive this message"); return;
-		}		
-	},
-	printHelp : function (module_id) {
-		if (!module_id)
-			console.log("HELP knows about modules: " + this.modules.toJSONshort() + ". type 'help module_name' to get special info.");
-		else
-			this.modules.get(module_id).printHelp();
-	}
-});
+function ModuleHelp(){
+    return json_concat(DuckClient(), {
+        id : "ModuleHelp",
+        event_in : ["help", "print", "print:json"],
 
-var ModuleTest = DuckMessageQueueClient.extend({
-	id : "ModuleTest",
-	event_in : ["test", "test:restart"],
-	
-	tests : [],
-	index : 0,
-	buffer : null,
-	add : function (test) {
-		this.tests.push(test);
-	},
-	initialize : function () {
-		
-	},
-	processMessage : function (event, data) {
-		switch (event) {
-			case "test" : this.run(data); break;
-			case "test:restart" : this.restart(); break;
-			default : console.warning(this.id + ": we are not supposed to receive this message"); return;
-		}		
-	},
-	run : function (data) {
-	    //console.log("ModuleTest running " + this.index + " test");
-	    //console.log(this.tests[this.index]);
-		this.tests[this.index](data);
-		this.index++;
-	},
-	restart : function() {
-		this.index = 0;
-	},
-	printHelp : function (module_id) {
-		console.log("ModuleTest " + this.id + ": to run test module, use " + this.event_in + " and number of test");
-	}	
-});
+        modules : [],
+        include : function (module) {
+            this.modules.push(module);
+        },
+        processMessage : function (event, data) {
+            switch (event) {
+                case "help" : this.printHelp(data); break;
+                case "print" :
+                    if (data.data)
+                        console.info(data.data);
+                    else
+                        console.info(data);
+                    break;
+                case "print:json" : console.info(JSON.stringify(data.data)); break;
+                default : console.warning(this.id + ": we are not supposed to receive this message"); return;
+            }
+        },
+        printHelp : function (module_id) {
+            if (!module_id)
+                console.log("HELP knows about modules: " + aoj_extract(this.modules, "id") + ". type 'help module_name' to get special info.");
+            else {
+                console.log(aoj_select(this.modules, {id: module_id}));
+                aoj_select(this.modules, {id: module_id})[0].printHelp();
+            }
+        }
+    });
+};
+
+function ModuleTest () {
+    return json_concat(DuckClient(), {
+        id: "ModuleTest",
+        event_in: ["test", "test:restart"],
+
+        tests: [],
+        index: 0,
+        buffer: null,
+        add: function (test) {
+            this.tests.push(test);
+        },
+        processMessage: function (event, data) {
+            switch (event) {
+                case "test" :
+                    this.run(data);
+                    break;
+                case "test:restart" :
+                    this.restart();
+                    break;
+                default :
+                    console.warning(this.id + ": we are not supposed to receive this message");
+                    return;
+            }
+        },
+        run: function (data) {
+            //console.log("ModuleTest running " + this.index + " test");
+            //console.log(this.tests[this.index]);
+            this.tests[this.index](data);
+            this.index++;
+        },
+        restart: function () {
+            this.index = 0;
+        },
+        printHelp: function (module_id) {
+            console.log("ModuleTest " + this.id + ": to run test module, use " + this.event_in + " and number of test");
+        }
+    });
+};
 
 /*
 This module contains all objects, and provides access to them 
@@ -77,79 +83,80 @@ ls  - array of IDs
 return is {data : <object>}
 */
 
-var ModuleObjectStorage = DuckMessageQueueClient.extend({
-	id : "ModuleObjectStorage",
-	event_in : ["os:load", "os:save", "os:get", "os:insert", "os:remove", "os:ls"],
-	
-	io : null,
-	objects : null, // small JS database
-	
-	initialize : function () {
-	    this.io = new FileSystemAccess();
-		this.objects = TAFFY();
-	},
-	processMessage : function (event, data) {
-		switch (event) {
-		    case "os:load" : 
-		    	this.load(); 
-		    	if (data.callback)
-		    		this.sendMessage(data.callback, "OK");
-		    	break;
-		    case "os:save" : 
-		    	this.save();
-		    	if (data.callback)
-		    		this.sendMessage(data.callback, "OK");
-		    	break;
-			case "os:insert" :             // data == object == record
-			 this.objects.insert(data.data);
-			 if (data.callback)
-		    		this.sendMessage(data.callback, "OK");
-			 break; 
-			case "os:get" :               // data == {callback, filter == {<name>:<value>}}
-			 this.sendMessage(data.callback, {data : this.objects(data.filter).first()}); 
-			 break;  			
-			case "os:remove" :            // data == filter == {<name>:<value>}				
-			 this.objects(data.filter).remove(); 
-			 if (data.callback)
-		    		this.sendMessage(data.callback, "OK");break;
-			case "os:ls" :                // data == {callback, filter == {<name>:<value>}}
-			 this.sendMessage(data.callback, {data : this.objects(data.filter).select("id")}); 
-			 break; 
-			default : 
-			 console.warning(this.id + ": we are not supposed to receive this message"); return;
-		}		
-	},
-	load : function () {
-        var self = this;
-        var filename = "data_storage/" + this.id + ".txt";        
-        this.io.read(filename, function(data){
-            // on succesfull read init database
-                self.objects = TAFFY(data);                
+function ModuleObjectStorage () {
+    return json_concat(DuckClient(), {
+        id: "ModuleObjectStorage",
+        event_in: ["os:load", "os:save", "os:get", "os:insert", "os:remove", "os:ls"],
+
+        io: FileSystemAccess(),
+        objects: TAFFY(), // small JS database
+
+        processMessage: function (event, data) {
+            switch (event) {
+                case "os:load" :
+                    this.load();
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                case "os:save" :
+                    this.save();
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                case "os:insert" :             // data == object == record
+                    this.objects.insert(data.data);
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                case "os:get" :               // data == {callback, filter == {<name>:<value>}}
+                    this.sendMessage(data.callback, {data: this.objects(data.filter).first()});
+                    break;
+                case "os:remove" :            // data == filter == {<name>:<value>}
+                    this.objects(data.filter).remove();
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                case "os:ls" :                // data == {callback, filter == {<name>:<value>}}
+                    this.sendMessage(data.callback, {data: this.objects(data.filter).select("id")});
+                    break;
+                default :
+                    console.warning(this.id + ": we are not supposed to receive this message");
+                    return;
+            }
+        },
+        load: function () {
+            var self = this;
+            var filename = "data_storage/" + this.id + ".txt";
+            this.io.read(filename, function (data) {
+                // on succesfull read init database
+                self.objects = TAFFY(data);
                 console.info("ModuleObjectStorage '" + self.id + "': loaded " + self.objects().count() + " records");
-            }, function() {            
+            }, function () {
                 console.error("ModuleObjectStorage '" + self.id + "': didn't load");
             });
-    },
-    save : function() {
-        var self = this;
-        var filename = "data_storage/" + this.id + ".txt";
-        this.io.write(this.objects().get(), filename,
-            function(){
-                console.info("ModuleObjectStorage '" + self.id + "': saved");
-            }, 
-            function(){
-                console.error("ModuleObjectStorage '" + self.id + "': failed to save");
-            });
-    },
-	printHelp : function () {
-		console.log("ModuleObjectStorage " + this.id + ": commands are " + this.event_in);
-	}
-});
+        },
+        save: function () {
+            var self = this;
+            var filename = "data_storage/" + this.id + ".txt";
+            this.io.write(this.objects().get(), filename,
+                function () {
+                    console.info("ModuleObjectStorage '" + self.id + "': saved");
+                },
+                function () {
+                    console.error("ModuleObjectStorage '" + self.id + "': failed to save");
+                });
+        },
+        printHelp: function () {
+            console.log("ModuleObjectStorage " + this.id + ": commands are " + this.event_in);
+        }
+    });
+};
 
 /*
  * This module computes effect of action performed by a character and a response of target if one responds.
  */
-var ModuleEstimate = DuckMessageQueueClient.extend({
+function ModuleEstimate(){
+        return json_concat(DuckClient(), {
 	id : "ModuleEstimate",
 	actor : null,
 	action : null,
@@ -239,85 +246,66 @@ var ModuleEstimate = DuckMessageQueueClient.extend({
 		console.log("ModuleEstimate " + this.id + ": commands are " + this.event_in);
 	}
 });
+};
 
 /*
  * This module knows how to apply effect computed in ModuelEstimate
  */
-var ModuleApplyEffect = DuckMessageQueueClient.extend({
-	id : "ModuleApplyEffect",
-	event_in : ["ae:effect", "ae:target", "ae:modificator", "ae:apply", "ae:clear"],
-	
-	target : null,
-	effect : null,
+function ModuleApplyEffect () {
+    return json_concat(DuckClient(), {
+        id: "ModuleApplyEffect",
+        event_in: ["ae:effect", "ae:target", "ae:modificator", "ae:apply", "ae:clear"],
 
-	processMessage : function (event, data) {
-		switch (event) {
-		    case "ae:effect" :  // data === {who, effect}
-             console.info("ModuleApplyEffect " + this.id + ": target set: '" + data.data.who.id + "' effect set");
-             this.target = data.data.who; this.effect = data.data.effect; 
-             if (data.callback)
-		    		this.sendMessage(data.callback, "OK");break;
-			case "ae:target" :  // data === {data:object}
-			 console.info("ModuleApplyEffect" + this.id + ": target set: '" + data.data.id + "'");
-			 this.target = data.data; 
-			 if (data.callback)
-		    		this.sendMessage(data.callback, "OK");break;
-			case "ae:modificator" :  // data === {data:object}
-			 console.info("ModuleApplyEffect" + this.id + ": effect set");
-			 this.effect = data.data; 
-			 if (data.callback)
-		    		this.sendMessage(data.callback, "OK");break;
-			case "ae:apply" :  // data === {callback}
-             this.apply();
-             if (data.callback)
-		    		this.sendMessage(data.callback, "OK");break;
-			case "ae:clear" : 
-			 this.clear(); 
-			 if (data.callback)
-		    		this.sendMessage(data.callback, "OK");break;
-			default : console.warning(this.id + ": we are not supposed to receive this message"); return;
-		}
-	},
-	clear : function () {
-		this.target = null;
-		this.effect = null;
-		console.log(this.id + ": discard effect: OK");
-	},
-	apply : function () {
-		//TODO
-	},
-	printHelp : function () {
-		console.log("ModuleApplyEffect " + this.id + ": commands are " + this.event_in);
-	}
-});
+        target: null,
+        effect: null,
 
-//TESTING
-testModules = function () {
-	console.log("test modules");
-	SMQ = new DuckMessageQueue({id : "message_queue"});
-	SMQ.start();
-	
-	aos = new ModuleObjectStorage({id : "os"});
-	aos.connectTo(SMQ);
-	
-	ame = new ModuleEstimate({id : "es"});
-	ame.connectTo(SMQ);
-
-	amae = new ModuleApplyEffect({id : "ae"});
-	amae.connectTo(SMQ);
-	
-	help = new ModuleHelp();
-	help.connectTo(SMQ);
-	help.include(aos);
-	help.include(ame);
-	help.include(amae);
-	
-	cin = new ConsoleInput();
-	cin.commands_dictionary = amae.event_in.concat(ame.event_in.concat(aos.event_in.concat(help.event_in)));
-
-	cin_view = new ConsoleInputView({model : cin});
-	cin_view.render();
-	
-	$("#body").append(cin_view.el);
-	cin.connectTo(SMQ);	
+        processMessage: function (event, data) {
+            switch (event) {
+                case "ae:effect" :  // data === {who, effect}
+                    console.info("ModuleApplyEffect " + this.id + ": target set: '" + data.data.who.id + "' effect set");
+                    this.target = data.data.who;
+                    this.effect = data.data.effect;
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                case "ae:target" :  // data === {data:object}
+                    console.info("ModuleApplyEffect" + this.id + ": target set: '" + data.data.id + "'");
+                    this.target = data.data;
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                case "ae:modificator" :  // data === {data:object}
+                    console.info("ModuleApplyEffect" + this.id + ": effect set");
+                    this.effect = data.data;
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                case "ae:apply" :  // data === {callback}
+                    this.apply();
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                case "ae:clear" :
+                    this.clear();
+                    if (data.callback)
+                        this.sendMessage(data.callback, "OK");
+                    break;
+                default :
+                    console.warning(this.id + ": we are not supposed to receive this message");
+                    return;
+            }
+        },
+        clear: function () {
+            this.target = null;
+            this.effect = null;
+            console.log(this.id + ": discard effect: OK");
+        },
+        apply: function () {
+            //TODO
+        },
+        printHelp: function () {
+            console.log("ModuleApplyEffect " + this.id + ": commands are " + this.event_in);
+        }
+    });
 };
+

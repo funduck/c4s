@@ -2,15 +2,15 @@
  * filling template with data, while logging errors
  */
 function _template(_tmpl, _args){
-	if (_args == null || _tmpl == null) return null;
-	var ret = null;
-	try{
-		ret =  _.template($(_tmpl).html())(_args);
-	}catch(e){
-		console.log('INFO _template( "'+_tmpl+'" = {'+$(_tmpl).html()+'} '+JSON.stringify(_args)+') exception: '+e);
-		return null;
-	} 
-	return ret;
+    if (_args == null || _tmpl == null) return null;
+    var ret = null;
+    try{
+        ret =  _.template($(_tmpl).html())(_args);
+    }catch(e){
+        console.log('INFO _template( "'+_tmpl+'" = {'+$(_tmpl).html()+'} '+JSON.stringify(_args)+') exception: '+e);
+        return null;
+    }
+    return ret;
 };
 
 function clone(obj) {
@@ -46,25 +46,29 @@ function clone(obj) {
 };
 
 function log(text){
-	if(!logging_silent){
-		console.log(text);
-	}
+    if(!logging_silent){
+        console.log(text);
+    }
 };
 
 function Sequence(_v){
     return {
         value : _v,
         nextval : function() {
-                  this.value++;
-                  return this.value;
-                  }
-        };
+            this.value++;
+            return this.value;
+        }
+    };
 };
 
 function round(x){
     if (x % 1 >= 0.5) return x - x % 1 + 1;
     return x - x % 1;
 };
+
+function floor(x){
+    return x - (x % 1);
+}
 
 function abs(x){
     if (x < 0)

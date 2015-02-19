@@ -4,8 +4,8 @@ function create_test_characters() {
     c1.bonuses = [{all : +1, time : 1}];
     var c2 = test_character("B");
     c2.bonuses = [{all : -1, time : 1}];
-    aos.objects.insert(c1);
-    aos.objects.insert(c2);
+    os.objects.insert(c1);
+    os.objects.insert(c2);
 }
 
 function test_attack_and_defence(who, attack, target, defence, cube_attack, cube_defence) {
@@ -74,6 +74,6 @@ function test_attack_and_defence(who, attack, target, defence, cube_attack, cube
     mt.add(function(data){
         console.log("test took " + ((new Date()).getTime() - startTime) + " msec" );
     });
-    //mt.run(0);
+    mt.run(0);
 
 };

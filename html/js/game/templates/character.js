@@ -13,7 +13,7 @@ function full_template_character(id) {
     c.chars = clone(TemplateCharacteristics);
     c.id = id;
     
-    console.log("full_template_character: " + JSON.stringify(c));
+    //console.log("full_template_character: " + JSON.stringify(c));
     
     return c;
 }
@@ -36,7 +36,7 @@ function test_character(id) {
     
     c.bonuses = [];
     
-    console.log("test_character: " + JSON.stringify(c));
+    //console.log("test_character: " + JSON.stringify(c));
     
     return c;
 }
